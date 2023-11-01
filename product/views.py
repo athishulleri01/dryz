@@ -37,10 +37,15 @@ def ViewProducts(request):
 
 
 def AddProduct(request):
+    url = request.META.get('HTTP_REFERER')
     product = Product()
     if request.method == 'POST':
         product_name = request.POST.get('product_name')
-        product.product_name = request.POST.get('product_name')
+        if Product.objects.filter(product_name=product_name).exists():
+            messages.error(request,"Product name already exist..!")
+            return redirect(url)
+        else:
+            product.product_name = request.POST.get('product_name')
         product.slug = product_name.replace(" ", "-")
         product.description = request.POST.get('description')
         sub_category = request.POST.get('category_name')

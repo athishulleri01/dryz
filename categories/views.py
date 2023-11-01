@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect
 
 from product.models import Product, ProductVariant
 from .models import Category, Sub_Category
+from django.contrib import messages
 
 
 # Create your views here.
@@ -10,10 +11,15 @@ from .models import Category, Sub_Category
 
 # <----------------------Add Category------------------------->
 def AddCategory(request):
+    url = request.META.get('HTTP_REFERER')
     if request.method == 'POST':
         cat = Category()
         category_name = request.POST.get('category_name')
-        cat.category_name =category_name
+        if Category.objects.filter(category_name=category_name).exists():
+            messages.error(request, "This category name already exist ")
+            return redirect(url)
+        else:
+            cat.category_name =category_name
         cat.slug=category_name.replace(" ", "-")
         cat.description = request.POST.get('description')
         cat.cat_image = request.FILES.get('cat_img')
@@ -109,9 +115,17 @@ def Unlist(request, cat_id):
 
 # <---------------------Edit Category-------------------------->
 def Edit_category(request, category_id):
+    url = request.META.get('HTTP_REFERER')
     cat = Category.objects.get(id=category_id)
     if request.method == 'POST':
-        cat.category_name = request.POST.get('category_name')
+        category_name = request.POST.get('category_name')
+        if cat.category_name != category_name:
+
+            if Category.objects.filter(category_name=category_name).exists():
+                messages.error(request, "This category name already exist ")
+                return redirect(url)
+            else:
+                cat.category_name = request.POST.get('category_name')
         cat.description = request.POST.get('description')
         img = request.FILES.get('cat_img')
         if img is None:
@@ -136,10 +150,14 @@ def Edit_category(request, category_id):
 
 # <-------------------Add Sub-Category-------------------------->
 def AddSubCategory(request):
+    url=request.META.get('HTTP_REFERER')
     if request.method == 'POST':
         category_id = request.POST.get('category_name')
         category_instance = Category.objects.get(pk=category_id)
         sub_category_name = request.POST.get('sub_category_name')
+        if Sub_Category.objects.filter(sub_category_name=sub_category_name).exists():
+            messages.error(request, "This subcategory name already exist ")
+            return redirect(url)
         slug = sub_category_name.replace(" ", "-")
         description = request.POST.get('description')
         cat_image = request.FILES.get('cat_img')

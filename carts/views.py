@@ -6,6 +6,7 @@ from django.views import View
 
 from accounts.models import CustomUser
 from carts.models import Cart, CartItem, Address
+from home.models import UserWallet
 from order.models import Order, OrderItem, Coupon
 from product.models import Product, ProductVariant
 import random
@@ -150,11 +151,9 @@ def add_cart(request, product_id):
 
         except:
             return HttpResponse("not working")
-
     return redirect('cart')
 
-# cart = CartItem.objects.get(variant=variant).exists()
-#         print(cart,"kkkkkkkkkkkkkkkkkk")
+
 def cart(request, total=0, quantity=0, cart_items=None):
     cart_id = _cart_id(request)
     tax = 0
@@ -179,7 +178,7 @@ def cart(request, total=0, quantity=0, cart_items=None):
                 Q(end_date__gte=current_date) &
                 Q(active=True)
             )
-
+            discount = valid_coupons.coupon_discount
             for cart_item in cart_items:
                 total += (cart_item.variant.selling_price * cart_item.quantity)
                 quantity += cart_item.quantity
@@ -187,13 +186,16 @@ def cart(request, total=0, quantity=0, cart_items=None):
             grand_total = total + tax
             if total > valid_coupons.min_purchase:
                 request.session['coupon'] = valid_coupons.coupon_discount
-                total = total - valid_coupons.coupon_discount
+                total_value = total - valid_coupons.coupon_discount
+                discount = valid_coupons.coupon_discount
+                messages.success(request, f'Coupon {valid_coupons.coupon_name} applied successfully')
             else:
                 valid_coupon = Coupon.objects.filter(
                     Q(start_date__lte=current_date) &
                     Q(end_date__gte=current_date) &
                     Q(active=True)
                 )
+
                 messages.error(request, f'This Coupon only applicable for minimum amount{valid_coupons.min_purchase}')
                 context = {
                     'total': total,
@@ -201,21 +203,26 @@ def cart(request, total=0, quantity=0, cart_items=None):
                     'cart_items': cart_items,
                     'tax': tax,
                     'grand_total': grand_total,
-                    'valid_coupons': valid_coupon
+                    'valid_coupons': valid_coupon,
+                    # 'discount': discount
 
                 }
                 return render(request, 'user/cart/cart.html', context)
         except ObjectDoesNotExist:
             pass
+        coupon_code = valid_coupons.coupon_code
         valid_coupons = None
+
         context = {
             'total': total,
             'quantity': quantity,
             'cart_items': cart_items,
             'tax': tax,
             'grand_total': grand_total,
-            'valid_coupons': valid_coupons
-
+            'valid_coupons': valid_coupons,
+            'discount': discount,
+            'total_value': total_value,
+            'coupon_code': coupon_code
         }
         return render(request, 'user/cart/cart.html', context)
 
@@ -270,8 +277,17 @@ def remove(request, product_id):
     if cart_item.quantity > 1:
         cart_item.quantity -= 1
         cart_item.save()
+        # calculating subtotal
+        sub_total = 0
+        try:
+            cart_items = CartItem.objects.filter(user=request.user, is_active=True)
+        except:
+            cart = Cart.objects.get(cart_id=cart_id)
+            cart_items = CartItem.objects.filter(cart=cart, is_active=True)
+        for item in cart_items:
+            sub_total += (item.variant.selling_price * item.quantity)
         total = cart_item.quantity * cart_item.variant.selling_price
-        return JsonResponse({'quantity': cart_item.quantity, 'total': total})
+        return JsonResponse({'quantity': cart_item.quantity, 'total': total,'sub_total': sub_total})
     else:
         cart_item.delete()
         return JsonResponse({'status': 'empty'})
@@ -287,11 +303,21 @@ def adding(request, product_id):
     except:
         cart = Cart.objects.get(cart_id=cart_id)
         cart_item = CartItem.objects.get(variant=productvariant, cart=cart)
+
     # if cart_item.quantity > 1:
     cart_item.quantity += 1
     cart_item.save()
+    # calculating subtotal
+    sub_total = 0
+    try:
+        cart_items = CartItem.objects.filter(user=request.user, is_active=True)
+    except:
+        cart = Cart.objects.get(cart_id=cart_id)
+        cart_items = CartItem.objects.filter(cart=cart, is_active=True)
+    for item in cart_items:
+        sub_total += (item.variant.selling_price * item.quantity)
     total = cart_item.quantity * cart_item.variant.selling_price
-    return JsonResponse({'quantity': cart_item.quantity, 'total': total})
+    return JsonResponse({'quantity': cart_item.quantity, 'total': total, 'sub_total': sub_total})
 
 
 def remove_cart_item(request, product_id):
@@ -311,14 +337,23 @@ def remove_cart_item(request, product_id):
 # user profile
 @login_required(login_url='user_signin')
 def profile(request):
+    url = request.META.get('HTTP_REFERER')
     if request.method == 'POST':
         email = request.session['user-email']
         user = CustomUser.objects.get(email=email)
         username = request.POST.get('username')
-        if CustomUser.objects.filter(username=username).exists():
-            messages.error(request, "username already exist..!")
+        if username != user.username:
+            if CustomUser.objects.filter(username=username).exists():
+                messages.error(request, "username already exist..!")
+                return redirect(url)
+            else:
+                user.username = request.POST.get('username')
+                user.email = request.POST.get('email')
+                user.phone = request.POST.get('phone')
+                user.first_name = request.POST.get('firstname')
+                user.last_name = request.POST.get('lastname')
+                user.save()
         else:
-            user.username = request.POST.get('username')
             user.email = request.POST.get('email')
             user.phone = request.POST.get('phone')
             user.first_name = request.POST.get('firstname')
@@ -431,13 +466,42 @@ def delete_address(request, address_id):
 
 @login_required(login_url='user_signin')
 def checkout(request):
+    url = request.META.get('HTTP_REFERER')
+    global item, address, cart_items
+    discount = 0
+    # ---------------------------------------checking stock------------------------------------------------
+    try:
+        email = request.session['user-email']
+        user = CustomUser.objects.get(email=email)
+        if user is not None:
+            cart_items = CartItem.objects.filter(user=user, is_active=True).order_by('id')
+    except:
+        cart_id = _cart_id(request)
+        cart = Cart.objects.get(cart_id=cart_id)
+        cart_items = CartItem.objects.filter(cart=cart, is_active=True).order_by('id')
+
+    for item in cart_items:
+        variant = item.variant
+        print(variant.product.product_name,variant.stock,item.quantity)
+        if item.quantity >= variant.stock+1:
+            print("no", variant.stock, variant.product.product_name)
+            messages.error(request, f"only {variant.stock} stock left on product {variant.product.product_name} weight {variant.weight}")
+            return redirect('cart')
+        else:
+            print("yes", variant.stock,variant.product.product_name)
+    # ---------------------------------------checking stock------------------------------------------------end
+
     if request.method == 'POST':
         email = request.session['user-email']
         user = CustomUser.objects.get(email=email)
         recipient_name = request.POST.get('username')
         selected_address_id = request.POST.get('selectedAddress')
         if recipient_name is None:
-            address = Address.objects.get(id=selected_address_id)
+            try:
+                address = Address.objects.get(id=selected_address_id)
+            except:
+                messages.error(request,"Create a address..!")
+                return redirect(url)
         else:
             address = Address.objects.get(recipient_name=recipient_name)
 
@@ -464,10 +528,12 @@ def checkout(request):
             if offer is not None:
                 offer = request.session['coupon']
                 order.total_price = cart_total_price - offer
+
             else:
                 order.total_price = cart_total_price
             order.payment_mode = request.POST.get('payment_mode')
             order.payment_id = request.POST.get('payment_id')
+            # order.save()
         elif payment_mode == 'wallet':
             users = CustomUser.objects.get(email=email)
             wallet = users.wallet
@@ -481,8 +547,10 @@ def checkout(request):
                 order.total_price = wallet - cart_total_price
                 users.wallet = wallet - cart_total_price
             users.save()
+             
             order.payment_mode = 'wallet'
             order.payment_id = ' '
+            # order.save()
         else:
             if offer is not None:
                 offer = request.session['coupon']
@@ -505,12 +573,19 @@ def checkout(request):
                 user=user
             )
             # reduce the product quantity from available stock
-            orderproduct = ProductVariant.objects.filter(
+            orderproduct = ProductVariant.objects.get(
                 id=item.variant.id
-                ).first()
+                )
+            print(orderproduct.stock)
             orderproduct.stock = orderproduct.stock - item.quantity
+            print(orderproduct.stock)
             orderproduct.save()
-        Cart.objects.filter(cart_id= item.cart.cart_id).delete()
+
+            # delete cart
+            try:
+                Cart.objects.get(cart_id= item.cart.cart_id).delete()
+            except:
+                pass
 
         payMode = request.POST.get('payment')
         if payMode == 'Paid by Razorpay':
@@ -518,14 +593,14 @@ def checkout(request):
             return JsonResponse({
                 'status': 'Your order has been placed successfully',
                 'order': f"{order_status}",
-                'cart_items': 'athii'
+                'discount': discount
             }, content_type='application/json')
         elif payMode == 'wallet':
             order_status = order.status
             return JsonResponse({
                 'status': 'Your order has been placed successfully',
                 'order': f"{order_status}",
-                'cart_items': 'manu'
+                'discount' : discount
             }, content_type='application/json')
         else:
             # invoice = GenerateInvoice()
@@ -534,7 +609,9 @@ def checkout(request):
 
             cont = {
                 'order': order,
-                'cart_items': neworderitems
+                'cart_items': neworderitems,
+                'offer': offer,
+                'total': cart_total_price
             }
             html = template.render(cont)
             result = BytesIO()
@@ -551,16 +628,22 @@ def checkout(request):
             )
             email.attach_alternative(html, "text/html")
             email.attach(filename, pdf, 'application/pdf')
-            email.send(fail_silently=False)
-
+            try:
+                email.send(fail_silently=False)
+            except Exception as e:
+                print(f"An error occurred: {e}")
+            #     delete session
+            if offer is not None:
+                del request.session['coupon']
             return render(request, 'user/order/order_page.html', cont)
         # return redirect('home')
 
     if 'user-email' in request.session:
         cart_id = _cart_id(request)  # Get or generate the cart_id
         tax = 0
+        total=0
         grand_total = 0
-        total = 0
+        subtotal = 0
         quantity = 0
         cart_items = ''
         try:
@@ -573,10 +656,11 @@ def checkout(request):
                 cart = Cart.objects.get(cart_id=cart_id)
                 cart_items = CartItem.objects.filter(cart=cart, is_active=True)
             for cart_item in cart_items:
-                total += (cart_item.variant.selling_price * cart_item.quantity)
+                subtotal += (cart_item.variant.selling_price * cart_item.quantity)
                 quantity += cart_item.quantity
-            tax = (2 * total) / 100
-            grand_total = total + tax
+            total = subtotal
+            tax = (2 * subtotal) / 100
+            grand_total = subtotal + tax
 
         except ObjectDoesNotExist:
             pass
@@ -592,17 +676,19 @@ def checkout(request):
             default_address = Address.objects.filter(user_id=user).first()
         try:
             if request.session['coupon']:
-                offer = request.session['coupon']
-                total = total - offer
+                discount = request.session['coupon']
+                total = subtotal - discount
         except:
             pass
         context = {
-            'total': total,
+            'subtotal': subtotal,
             'quantity': quantity,
             'cart_items': cart_items,
             'addresses': addresses,
             'grand_total': grand_total,
             'default_address': default_address,
+            'total': total,
+            'discount': discount
 
         }
         return render(request, 'user/checkout/checkout.html', context)

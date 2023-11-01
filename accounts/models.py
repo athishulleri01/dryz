@@ -4,6 +4,8 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager, Group as A
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+# from product.models import ProductVariant
+
 
 class CustomUserManager(BaseUserManager):
     """Define a model manager for User model with no username field."""
@@ -43,6 +45,8 @@ class CustomUser(AbstractUser):
     username = models.CharField(max_length=20, unique=False, verbose_name='username',
                                 blank=True, null=True)
     wallet = models.FloatField(default=0)
+    otp = models.IntegerField(default=0)
+    authenticated = models.BooleanField(default=False)
 
     # wallet  = models.PositiveIntegerField(default=0)
     groups = models.ManyToManyField(
@@ -66,3 +70,5 @@ class CustomUser(AbstractUser):
     REQUIRED_FIELDS = ['phone']
 
     objects = CustomUserManager()
+
+

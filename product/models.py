@@ -76,23 +76,23 @@ class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)  # Change related_name
     image = models.ImageField(upload_to='images/product_images/')
 
-    class Coupon(models.Model):
-        coupon_name = models.CharField(max_length=100)
-        coupon_code = models.CharField(max_length=100)
-        min_price = models.IntegerField()
-        coupon_discount_amount = models.PositiveIntegerField()
-        start_date = models.DateField(default=timezone.now)
-        end_date = models.DateField(default=timezone.now)
-        is_available = models.BooleanField(default=True)
-
-        def __str__(self):
-            return self.coupon_name
-
-        def is_coupon_expired(self):
-            return timezone.now().date() >= self.end_date
+class Coupon(models.Model):
+    coupon_name = models.CharField(max_length=100)
+    coupon_code = models.CharField(max_length=100)
+    min_price = models.IntegerField()
+    coupon_discount_amount = models.PositiveIntegerField()
+    start_date = models.DateField(default=timezone.now)
+    end_date = models.DateField(default=timezone.now)
+    is_available = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"Image for {self.product.product_name}"
+        return self.coupon_name
+
+    def is_coupon_expired(self):
+        return timezone.now().date() >= self.end_date
+
+def __str__(self):
+    return f"Image for {self.product.product_name}"
 
 
 

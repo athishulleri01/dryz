@@ -7,6 +7,7 @@ from order.models import Order, OrderItem, ReturnOrder, Coupon
 from django.http import HttpResponse
 from django.template.loader import get_template
 from xhtml2pdf import pisa
+from django.contrib import messages
 # Create your views here.
 
 
@@ -19,10 +20,21 @@ def ViewCoupons(request):
 
 
 def add_coupon(request):
+    url = request.META.get('HTTP_REFERER')
     if request.method == 'POST':
         coupon = Coupon()
-        coupon.coupon_name=request.POST.get('coupon_name')
-        coupon.coupon_code = request.POST.get('coupon_code')
+        coupon_name = request.POST.get('coupon_name')
+        if Coupon.objects.filter(coupon_name=coupon_name).exists():
+            messages.error(request, "coupon name already exist ")
+            return redirect(url)
+        else:
+            coupon.coupon_name=request.POST.get('coupon_name')
+        coupon_code = request.POST.get('coupon_code')
+        if Coupon.objects.filter(coupon_code=coupon_code).exists():
+            messages.error(request, "coupon code already exist ")
+            return redirect(url)
+        else:
+            coupon.coupon_code = request.POST.get('coupon_code')
         coupon.min_purchase=request.POST.get('min_price')
         coupon.coupon_discount = request.POST.get('discount_amount')
         coupon.start_date=request.POST.get('start_date')
@@ -31,11 +43,24 @@ def add_coupon(request):
         return redirect('view_coupons')
 
 def edit_coupon(request,id):
+    url = request.META.get('HTTP_REFERER')
     if request.method == 'POST':
         coupon = Coupon.objects.get(id=id)
-        coupon.coupon_name = request.POST.get('coupon_name')
-        coupon.coupon_code = request.POST.get('coupon_code')
-        coupon.min_purchase = request.POST.get('min_price')
+        coupon_name = request.POST.get('coupon_name')
+        if coupon_name != coupon.coupon_name:
+            if Coupon.objects.filter(coupon_name=coupon_name).exists():
+                messages.error(request, "coupon name already exist ")
+                return redirect(url)
+            else:
+                coupon.coupon_name = request.POST.get('coupon_name')
+
+        coupon_code = request.POST.get('coupon_code')
+        if coupon_code !=coupon.coupon_code:
+            if Coupon.objects.filter(coupon_code=coupon_code).exists():
+                messages.error(request, "coupon code already exist ")
+                return redirect(url)
+            else:
+                coupon.min_purchase = request.POST.get('min_price')
         coupon.coupon_discount = request.POST.get('discount_amount')
         coupon.start_date = request.POST.get('start_date')
         coupon.end_date = request.POST.get('end_date')
@@ -266,7 +291,11 @@ def sales_report(request):
     if request.method == 'POST':
         start_date = request.POST.get('start_date')
         end_date = request.POST.get('end_date')
-        orders = Order.objects.filter(created_at__range=(start_date, end_date))
+        if start_date == end_date:
+            print(start_date)
+            orders = Order.objects.filter(created_at__date=start_date)
+        else:
+            orders = Order.objects.filter(created_at__range=(start_date, end_date))
         total_order = Order.objects.filter(created_at__range=(start_date, end_date)).count()
         Pending = Order.objects.filter(created_at__range=(start_date, end_date),status='Order confirmed').count()
         Processing = Order.objects.filter(created_at__range=(start_date, end_date),status="In Production").count()

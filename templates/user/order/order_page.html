@@ -92,9 +92,12 @@
                                         <tfoot>
                                             <tr>
                                                 <th colspan="5" class="text-right">Sub Total:</th>
-                                                <th class="text-center">₹{{order.total_price}}</th>
+                                                <th class="text-center">₹{{total}}</th>
                                             </tr>
-
+                                            <tr>
+                                                <th colspan="5" class="text-right"> Discount:</th>
+                                                <th class="text-center">₹{{offer}}</th>
+                                            </tr>
                                             <tr>
                                                 <th colspan="5" class="text-right">Grand Total:</th>
                                                 <th class="text-center">₹{{order.total_price}}</th>

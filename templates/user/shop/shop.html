@@ -14,6 +14,59 @@
   margin-left: 3px;
   font-size: 85%;
 }
+/* Style the radio buttons as circles */
+.size-label {
+    position: relative;
+    padding-left: 30px;
+    cursor: pointer;
+    font-size: 16px;
+    display: block;
+    margin-bottom: 12px;
+    user-select: none;
+}
+
+/* Hide the default radio input */
+.size-label input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* Create a custom radio button */
+.checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 20px;
+    width: 20px;
+    background-color: #eee;
+    border-radius: 50%;
+    transition: background-color 0.3s; /* Smooth color transition */
+}
+
+/* On radio button selection, change the background color and hide the radio symbol */
+.size-label input:checked + .checkmark {
+    background-color: red;
+}
+
+/* Hide the dot/circle when radio button is selected */
+.size-label input:checked + .checkmark:after {
+    display: none;
+}
+
+/* Style the dot/circle inside the radio button */
+.size-label .checkmark:after {
+    content: "";
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: white;
+    transition: display 0.3s; /* Smooth transition for hiding the dot */
+}
+
 
 </style>
 {%endblock%}
@@ -58,7 +111,8 @@
                             <h4>Price</h4>
                             <div class="price-range-wrap">
                                 <div class="price-range ui-slider ui-corner-all ui-slider-horizontal ui-widget ui-widget-content"
-                                     data-min="10" data-max="2000">
+                                     {% if min %} data-min="{{min}}" {% else %} data-min="10" {% endif %} {% if max %}
+                                     data-max="{{max}}" {% else %} data-max="2000" {% endif %}>
                                     <div class="ui-slider-range ui-corner-all ui-widget-header"></div>
                                     <span tabindex="0" class="ui-slider-handle ui-corner-all ui-state-default"></span>
                                     <span tabindex="0" class="ui-slider-handle ui-corner-all ui-state-default"></span>
@@ -74,26 +128,28 @@
                         <div class="sidebar__item">
                             <h4>Popular Size</h4>
                             <div class="sidebar__item__size">
-                                <label for="large">
+                                <label class="size-label" for="large">
+                                    <input type="radio" id="large" name="filter_weight" value="1" {% if weight == 1 %} checked {% else %} {% endif %}>
+                                    <span class="checkmark"></span>
                                     1 kg
-                                    <input type="radio" id="large" name="filter_weight" value="1">
                                 </label>
                             </div>
-
                             <div class="sidebar__item__size">
-                                <label for="medium">
+                                <label class="size-label" for="medium">
+                                    <input type="radio" id="medium" name="filter_weight" value="500"  {% if weight == 500 %} checked {% else %} {% endif %}>
+                                    <span class="checkmark"></span>
                                     500 gm
-                                    <input type="radio" id="medium" name="filter_weight" value="500">
                                 </label>
                             </div>
                             <div class="sidebar__item__size">
-                                <label for="small">
+                                <label class="size-label" for="small">
+                                    <input type="radio" id="small" name="filter_weight" value="250"  {% if weight == 250 %} checked {% else %} {% endif %}>
+                                    <span class="checkmark"></span>
                                     250 gm
-                                    <input type="radio" id="small" name="filter_weight" value="250">
                                 </label>
                             </div>
-
                         </div>
+
                         <button type="submit" class="btn btn-primary">filter</button>
                     </form>
                     <div class="sidebar__item">
@@ -109,7 +165,7 @@
                                             <img src="/media/{{product.product.images}}" alt="">
                                         </div>
                                         <div class="latest-product__item__text">
-                                            <h6>₹ {{product.product.product_name}}</h6>
+                                            <h6>{{product.product.product_name}}</h6>
                                             <span>₹ {{product.selling_price}}</span>
                                         </div>
                                     </a>
@@ -150,7 +206,8 @@
                                     <img src="/media/{{product.product.images}}">
                                 </a>
                                 <ul class="product__item__pic__hover">
-                                    <li><a href="{% url 'add_wishlist' variant_id=product.id%}"><i class="fa fa-heart"></i></a></li>
+                                    <li><a href="{% url 'add_wishlist' variant_id=product.id%}"><i
+                                            class="fa fa-heart"></i></a></li>
                                     <li><a href="#"><i class="fa fa-retweet"></i></a></li>
                                     <li><a href="{% url 'add_cart' product.id %}"><i
                                             class="fa fa-shopping-cart"></i></a></li>
@@ -216,7 +273,8 @@
                                         </a>
                                         <div class="product__discount__percent">-20%</div>
                                         <ul class="product__item__pic__hover">
-                                            <li><a href="{% url 'add_wishlist' variant_id=product.id%}"><i class="fa fa-heart"></i></a></li>
+                                            <li><a href="{% url 'add_wishlist' variant_id=product.id%}"><i
+                                                    class="fa fa-heart"></i></a></li>
                                             <li><a href="#"><i class="fa fa-retweet"></i></a></li>
                                             <li><a href="{% url 'add_cart' product.id %}"><i
                                                     class="fa fa-shopping-cart"></i></a></li>
@@ -224,8 +282,8 @@
                                     </div>
                                     <div class="product__discount__item__text">
                                         <span>{{product.product.category.category_name}}</span>
-                                        <h5><a href="#">₹ {{product.product.product_name}}</a></h5>
-                                        <div class="product__item__price">{{product.selling_price}}<span>{{product.original_price}}</span>
+                                        <h5><a href="#">{{product.product.product_name}}</a></h5>
+                                        <div class="product__item__price">₹ {{product.selling_price}}<span>{{product.original_price}}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -258,14 +316,15 @@
                                     <img src="/media/{{product.product.images}}">
                                 </a>
                                 <ul class="product__item__pic__hover">
-                                    <li><a href="{% url 'add_wishlist' variant_id=product.id%}"><i class="fa fa-heart"></i></a></li>
+                                    <li><a href="{% url 'add_wishlist' variant_id=product.id%}"><i
+                                            class="fa fa-heart"></i></a></li>
                                     <li><a href="#"><i class="fa fa-retweet"></i></a></li>
                                     <li><a href="{% url 'add_cart' product.id %}"><i
                                             class="fa fa-shopping-cart"></i></a></li>
                                 </ul>
                             </div>
                             <div class="product__item__text">
-                                <h6><a href="{% url 'single_product' product_id=product.id %}">₹
+                                <h6><a href="{% url 'single_product' product_id=product.id %}">
                                     {{product.product.product_name}}</a></h6>
                                 <h5>₹ {{product.selling_price}}</h5>
                             </div>
@@ -337,6 +396,7 @@
                 }
             });
         });
+
 
 </script>
 {% endblock %}

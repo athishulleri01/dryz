@@ -6,13 +6,17 @@ from django.core.mail import send_mail
 import threading
 from threading import local
 from accounts.middleware import request_local
+from accounts.models import CustomUser
 
 otp_generated = Signal()
 
-@receiver(otp_generated)
-def send_otp(sender, **kwargs):
-    request = request_local.request
-    email = kwargs.get('email')
+# @receiver(otp_generated)
+
+def send_otp(request,email):
+# def send_otp(sender, **kwargs):
+
+    # request = request_local.request
+    # email = kwargs.get('email')
     totp = pyotp.TOTP(pyotp.random_base32(), interval=120)
     otp = totp.now()
     request.session['otp_secret_key'] = totp.secret
@@ -42,4 +46,7 @@ def send_otp(sender, **kwargs):
 </div>
     """
     send_mail(subject, message, from_email, [email], fail_silently=False, html_message=htmlgen)
-    print(f"your OTP is{otp}")
+    request.session['email'] = email
+    user = CustomUser.objects.get(email=email)
+    user.otp = otp
+    user.save()

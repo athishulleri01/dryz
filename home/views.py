@@ -55,7 +55,6 @@ def ViewShop(request):
         minamount = int(remove_currency_symbols(request.POST.get('minamount')))
         maxamount = int(remove_currency_symbols(request.POST.get('maxamount')))
         filter_weight = request.POST.get('filter_weight')
-        print(minamount,maxamount,filter_weight)
 
         if minamount and minamount and filter_weight!= None:
             print("hooo")
@@ -64,6 +63,7 @@ def ViewShop(request):
         else:
             products_within_price_range = ProductVariant.objects.filter(selling_price__gte=minamount,
                                                                         selling_price__lte=maxamount)
+
         paginator = Paginator(products_within_price_range, 6)
         page_number = request.GET.get('page', 1)
         products_within_price_range = paginator.get_page(page_number)
@@ -73,6 +73,9 @@ def ViewShop(request):
             'all_products': products_within_price_range,
             'sale_off': products_within_price_range,
             'sub_category': sub_cat,
+            'min': minamount,
+            'max': maxamount,
+            'weight': int(filter_weight)
         }
         return render(request, 'user/shop/shop.html', context)
 

@@ -12,5 +12,6 @@ urlpatterns = [
          name='otp_forgot_password'),
     path('confirm_password', views.ConfirmPassword, name='confirm_password'),
     path('resend_otp', views.ResentOtp, name='resend_otp'),
+    path('resend_otp_signup', views.ResentOtpSignup, name='resend_otp_signup'),
     path('wallet', views.wallet, name='wallet'),
 ]

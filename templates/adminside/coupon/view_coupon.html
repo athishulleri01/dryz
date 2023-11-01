@@ -9,9 +9,12 @@
         <div class="col-md-12">
             <button type="button" class="btn text-white mb-3" style="background-color:rgba(127, 173, 57, 1)"
                     data-bs-toggle="modal" data-bs-target="#exampleModal">
-                Add Product
+                Add Coupon
             </button>
         </div>
+    </div>
+    <div>
+        {% include 'include/alert.html' %}
     </div>
     <div class="bg-light text-center rounded p-4">
         <div class="d-flex align-items-center justify-content-between mb-4">
@@ -73,7 +76,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-
+                    {% include 'include/alert.html' %}
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

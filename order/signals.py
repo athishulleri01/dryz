@@ -11,9 +11,8 @@ def send_order_creation_notification(sender, instance, created, **kwargs):
         # Compose the email message
         subject = 'New Order Created'
         message = f"A new order with ID {instance.id} has been created."
-        # Replace with your admin's email address
-        print(instance.user)
-        # send_mail(subject, message,'dryzz.official@gmail.com', ['athishulleri@gmail.com'])
+        send_mail(subject, message, 'dryzz.official@gmail.com', [instance.user.email])
+
         notification = Notification()
         notification.order = Order.objects.get(id=instance.id)
         notification.save()

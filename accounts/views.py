@@ -3,12 +3,10 @@ import re
 
 from django.shortcuts import render, redirect
 
-
 # authentication purpose
 from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.cache import never_cache
 from django.contrib import messages
-
 
 # otp generation  purpose
 from .models import CustomUser
@@ -22,7 +20,7 @@ from django.core.exceptions import ValidationError
 
 # <------------------------------------Start Login------------------------------------------------------>
 
-@never_cache
+# @never_cache
 # User sign-in view
 def UserSignin(request):
     # Check if the user is already authenticated
@@ -46,13 +44,14 @@ def UserSignin(request):
 
         if user is not None:
             if user.is_active is True and user.is_superuser is False:
-                try:
-                    pass
-                except:
-                    pass
-                login(request, user)
-                request.session['user-email'] = email
-                return redirect('home')
+                if user.authenticated == True:
+                    login(request, user)
+                    request.session['user-email'] = email
+                    return redirect('home')
+                else:
+                    messages.error(request,"verify your account using otp")
+                    send_otp(request,email)
+                    return redirect('signup_otp')
             else:
                 return redirect('user_signin')
         else:
@@ -276,12 +275,11 @@ def UserSignup(request):
 
         # sent email otp using signal
 
-        otp_generated.send(sender=None, email=email)
-        request.session['username'] = username
-        request.session['email'] = email
-        request.session['phone'] = phone
-        request.session['password'] = password
+        # otp_generated.send(sender=None, email=email)
 
+        my_user = CustomUser.objects.create_user(email, password=password, username=username, phone=phone)
+        my_user.save()
+        send_otp(request, email)
         return redirect('signup_otp')
 
     return render(request, 'user/user_register.html')
@@ -291,9 +289,6 @@ def UserSignup(request):
 
 def otp_signup(request):
     email = request.session['email']
-    username = request.session['username']
-    phone = request.session['phone']
-    password = request.session['password']
 
     if request.method == 'POST':
         otp = ''
@@ -310,22 +305,24 @@ def otp_signup(request):
             validate_until = datetime.fromisoformat(otp_valid_date)
             if validate_until > datetime.now():
                 totp = pyotp.TOTP(otp_secret_key, interval=120)
-                if totp.verify(otp):
-                    # User Registration
-                    my_user = CustomUser.objects.create_user(email, password=password, username=username, phone=phone)
-                    my_user.save()
+                user = CustomUser.objects.get(email=email)
+
+                if user.otp == int(otp):
+                    user.authenticated = True
+                    user.otp = 0
+                    user.save()
                     del request.session['otp_secret_key']
                     del request.session['otp_valid_date']
                     del request.session['email']
-                    del request.session['username']
-                    del request.session['phone']
-                    del request.session['password']
-                    request.session['user-email'] = email
-                    return redirect('home')
+                    messages.success(request, 'Created a new account. Please login !')
+                    return render(request, 'user/user_login.html')
                 else:
                     messages.error(request, 'Please enter proper OTP .')
             else:
                 messages.error(request, 'OTP expired.')
+                del request.session['otp_secret_key']
+                del request.session['otp_valid_date']
+                del request.session['email']
         else:
             del request.session['otp_secret_key']
             del request.session['otp_valid_date']
@@ -435,12 +432,25 @@ def ResentOtp(request):
         if 'otp_valid_date' in request.session:
             del request.session['otp_valid_date']
 
-            email= request.session['user_email']
-            send_otp(request,email)
+            email = request.session['user_email']
+            send_otp(request, email)
         return redirect('signin_otp')
     except Exception as e:
         print(e)
 
+
+def ResentOtpSignup(request):
+    try:
+        if 'otp_secret_key' in request.session:
+            del request.session['otp_secret_key']
+        if 'otp_valid_date' in request.session:
+            del request.session['otp_valid_date']
+
+            email = request.session['email']
+            send_otp(request, email)
+        return redirect('signup_otp')
+    except Exception as e:
+        print(e)
 
 def wallet(request):
     return render(request, 'user/user-profile/wallet.html')

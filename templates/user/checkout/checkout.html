@@ -58,7 +58,7 @@
 <section class="checkout spad">
     <div class="container">
 
-
+        {% include 'include/alert.html' %}
         <div class="checkout__form ">
             <h4>Billing Details</h4>
             <form method="post">
@@ -201,7 +201,8 @@
                                         {{item.quantity}}<span>₹{{item.sub_total}}</span></li>
                                     {% endfor %}
                                 </ul>
-                                <div class="checkout__order__subtotal">Subtotal <span>₹{{total}}</span></div>
+                                <div class="checkout__order__subtotal">Subtotal <span>₹ {{subtotal}}</span></div>
+                                <div class="checkout__order__total">Discount <span>₹ {{discount}}</span></div>
                                 <div class="checkout__order__total">Total <span>₹ {{total}}</span></div>
                                 <p>
                                     <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30"

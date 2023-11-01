@@ -22,6 +22,7 @@
     }
 
 
+
 </style>
 {%endblock%}
 <!-- Body Section Begin -->
@@ -37,6 +38,10 @@
 {% else %}
 <!-- Shoping Cart Section Begin -->
 <section class="shoping-cart spad">
+    <div class="m-2">
+        {% include 'include/alert.html' %}
+    </div>
+
     <div class="container">
         <div class="row">
             <div class="col-lg-12">
@@ -69,22 +74,25 @@
                             <td class="shoping__cart__quantity">
                                 <div class="col">
                                     <div class="input-group input-spinner">
-    <div class="input-group-prepend">
-        <a href="#" class="btn btn-light" id="button-minus" data-variant-id="{{ cart_item.variant.id }}">
-            <i class="fa fa-minus"></i>
-        </a>
-    </div>
-    <input type="text" class="form-control" value="{{ cart_item.quantity }}" id="quantity-{{ cart_item.variant.id }}">
-    <div class="input-group-append">
-        <a href="#" class="btn btn-light" id="button-plus" data-variant-id="{{ cart_item.variant.id }}">
-            <i class="fa fa-plus"></i>
-        </a>
-    </div>
-</div>
- <!-- input-group.// -->
+                                        <div class="input-group-prepend">
+                                            <a href="#" class="btn btn-light" id="button-minus"
+                                               data-variant-id="{{ cart_item.variant.id }}">
+                                                <i class="fa fa-minus"></i>
+                                            </a>
+                                        </div>
+                                        <input type="text" class="form-control" value="{{ cart_item.quantity }}"
+                                               id="quantity-{{ cart_item.variant.id }}">
+                                        <div class="input-group-append">
+                                            <a href="#" class="btn btn-light" id="button-plus"
+                                               data-variant-id="{{ cart_item.variant.id }}">
+                                                <i class="fa fa-plus"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <!-- input-group.// -->
                                 </div> <!-- col.// -->
                             </td>
-                            <td class="shoping__cart__total" id="total">
+                            <td class="shoping__cart__total" id="total{{ cart_item.variant.id }}">
                                 ₹{{ cart_item.sub_total }}
                             </td>
                             <td class="shoping__cart__item__close">
@@ -109,16 +117,17 @@
                 </div>
             </div>
             <div class="col-lg-6">
-                {% include 'include/alert.html' %}
+<!--                {% include 'include/alert.html' %}-->
                 <div class="shoping__continue">
                     <div class="shoping__discount">
                         <h5>Discount Codes</h5>
                         <form method="post">
                             {% csrf_token %}
-                            <input type="text" placeholder="Enter your coupon code" id="apply_coupon">
+                            <input type="text" {% if coupon_code %} value="{{coupon_code}}" {% else %} placeholder="Enter your coupon code" {% endif %} id="apply_coupon">
                             <button type="submit" class="site-btn">APPLY COUPON</button>
                             <div>
-                                <select class="form-select" aria-label="Default select example" id="coupon_select" name="coupon_select">
+                                <select class="form-select" aria-label="Default select example" id="coupon_select"
+                                        name="coupon_select">
                                     {% for coupon in valid_coupons %}
                                     <option value="{{ coupon.coupon_code }}">{{ coupon.coupon_name }}</option>
                                     {% endfor %}
@@ -133,8 +142,9 @@
                 <div class="shoping__checkout">
                     <h5>Cart Total</h5>
                     <ul>
-                        <li>Subtotal <span>₹{{total}}</span></li>
-                        <li>Total <span>₹{{total}}</span></li>
+                        <li>Subtotal <span id="subtotal">₹ {{total}}</span></li>
+                        <li>Discount <span id="discount">₹ {%if discount %}{{discount}}{% else %}0{% endif %}</span></li>
+                        <li>Total <span id="total_amount" >₹ {% if total_value%} {{total_value}} {% else %}  {{total}} {% endif %}</span></li>
                     </ul>
                     <a href="{% url 'checkout' %}" class="primary-btn">PROCEED TO CHECKOUT</a>
                 </div>
@@ -205,7 +215,23 @@
             success: function (data) {
                 quantityField.val(data.quantity);
                 console.log(data.quantity);
-                document.getElementById('total').innerText = "₹"+data.total;
+                console.log(data.sub_total);
+
+                document.getElementById('total' + variantId).innerText = "₹"+data.total;
+                document.getElementById('subtotal').innerText = "₹" + data.sub_total;
+
+                var totalAmount = document.getElementById('total_amount')
+
+                var discountSpan = document.getElementById('discount')
+                var discount = discountSpan.textContent;
+                console.log(discount);
+
+
+                    // Update the content of the span with the received total value
+                    var total = data.sub_total - parseInt(discount);
+                    totalAmount.innerText = "₹" + total;
+                    document.getElementById('subtotal').innerText = "₹" + data.sub_total;
+
             }
         });
     });
@@ -231,13 +257,29 @@
             }else{
                 quantityField.val(data.quantity);
                 console.log(data.quantity);
-                document.getElementById('total').innerText = "₹"+data.total;
+                                console.log("hi");
+                console.log(data.sub_total);
+                document.getElementById('total' + variantId).innerText = "₹"+data.total;
+                document.getElementById('subtotal').innerText = "₹" + data.sub_total;
+                var totalAmount = document.getElementById('total_amount')
+
+                var discountSpan = document.getElementById('discount')
+                var discount = discountSpan.textContent;
+                console.log(discount);
+
+                    // Update the content of the span with the received total value
+                    var total = data.sub_total - parseInt(discount);
+                    totalAmount.innerText = "₹" + total;
+                    document.getElementById('subtotal').innerText = "₹" + data.sub_total;
+
+
                 }
 
             }
         });
     });
 });
+
 
 
 </script>
