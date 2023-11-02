@@ -1,6 +1,7 @@
 # page navigation purpose
 import re
 
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
 # authentication purpose
@@ -8,6 +9,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.cache import never_cache
 from django.contrib import messages
 
+from home.models import UserWallet
 # otp generation  purpose
 from .models import CustomUser
 from .utils import send_otp, otp_generated
@@ -49,8 +51,8 @@ def UserSignin(request):
                     request.session['user-email'] = email
                     return redirect('home')
                 else:
-                    messages.error(request,"verify your account using otp")
-                    send_otp(request,email)
+                    messages.error(request, "verify your account using otp")
+                    send_otp(request, email)
                     return redirect('signup_otp')
             else:
                 return redirect('user_signin')
@@ -93,7 +95,7 @@ def signin_email_otp(request):
                 if user.is_active is True and user.is_superuser is False:
                     # If authentication succeeds, send an OTP for further verification
                     # sent email otp using signal
-                    otp_generated.send(sender=None, email=email)
+                    send_otp(request,email=email)
                     # Store email and password in the session for later use
                     request.session['user_email'] = email
                     return redirect('signin_otp')
@@ -452,5 +454,12 @@ def ResentOtpSignup(request):
     except Exception as e:
         print(e)
 
+
+@login_required(login_url='user_signin')
 def wallet(request):
-    return render(request, 'user/user-profile/wallet.html')
+    if request.user:
+        wallet_transaction = UserWallet.objects.filter(user=request.user)
+        context = {
+            'wallet_transaction': wallet_transaction
+        }
+        return render(request, 'user/user-profile/wallet.html', context)

@@ -1,3 +1,4 @@
+from django.core.mail import send_mail
 from django.http import HttpResponse
 from django.shortcuts import render
 
@@ -121,3 +122,15 @@ def Search(request):
 
     }
     return render(request, 'user/home/home.html', context)
+
+
+def contact(request):
+    if request.method == 'POST':
+        name = request.POST.get('names')
+        email = request.POST.get('email')
+        message = request.POST.get('message')
+        subject = "contact request"
+        message = f"{name} sent a message : {message}"
+        from_email = f"{email}"
+        send_mail(subject, message, from_email, ["dryzz.official@gmail.com"], fail_silently=False)
+    return render(request, 'user/contact/contact.html')

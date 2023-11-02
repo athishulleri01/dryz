@@ -547,7 +547,11 @@ def checkout(request):
                 order.total_price = wallet - cart_total_price
                 users.wallet = wallet - cart_total_price
             users.save()
-             
+            userwallet = UserWallet()
+            userwallet.user = user
+            userwallet.amount = cart_total_price
+            userwallet.transaction = 'Deducted'
+            userwallet.save()
             order.payment_mode = 'wallet'
             order.payment_id = ' '
             # order.save()
@@ -806,6 +810,7 @@ def fetch_resources(uri, rel):
     return path
 
 
+@login_required(login_url='user_signin')
 def render_to_pdf(template_src, context_dict={}):
     template = get_template(template_src)
     html  = template.render(context_dict)
@@ -816,6 +821,7 @@ def render_to_pdf(template_src, context_dict={}):
     return None
 
 
+@login_required(login_url='user_signin')
 class GenerateInvoice(View):
     def get(self, request, pk, *args, **kwargs):
         try:

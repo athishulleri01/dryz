@@ -10,8 +10,7 @@ from product.models import ProductVariant
 
 class UserWallet(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    transaction = models.BooleanField()
+    transaction = models.CharField(max_length=50)
     created_at = models.DateTimeField(auto_now_add=True)
     amount = models.FloatField()
     def __str__(self):

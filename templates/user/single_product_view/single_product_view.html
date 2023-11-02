@@ -2,7 +2,9 @@
 {% load static %}
 {% block 'title'%} product{% endblock %}
 {% block styles %}
+ <link rel="stylesheet" href="{% static 'css/image_cropping/style.css' %}" type="text/css">
 <style>
+
     .zoom-container {
     position: relative;
     overflow: hidden;
@@ -17,13 +19,6 @@
     cursor: zoom-in;
 }
 
-
-
-
-
-
-
-
 </style>
 {%endblock%}
 
@@ -31,23 +26,6 @@
 <!-- Body Section Begin -->
 {% block 'body' %}
 
-<!--<section class="breadcrumb-section set-bg" data-setbg="{% static 'img/breadcrumb.jpg' %}">-->
-<!--    <div class="container">-->
-<!--        <div class="row">-->
-<!--            <div class="col-lg-12 text-center">-->
-<!--                <div class="breadcrumb__text">-->
-<!--                    <h2>Vegetable’s Package</h2>-->
-<!--                    <div class="breadcrumb__option">-->
-<!--                        <a href="./index.html">Home</a>-->
-<!--                        <a href="./index.html">Vegetables</a>-->
-<!--                        <span>Vegetable’s Package</span>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--    </div>-->
-<!--</section>-->
-<!-- Breadcrumb Section End -->
 
 <!-- Product Details Section Begin -->
 <section class="product-details spad">
@@ -112,23 +90,20 @@
                         </div>
 
                         <p>{{product.product.description}}.</p>
-                        <div class="product__details__quantity">
-                        </div>
-                        {% if product.product.stock <= 0 %}
-                        <h5 class="text-danger">out of stock</h5>
-                        {% else %}
-                        <!--                        <a href="#" class="primary-btn" id="cart-button" style="background-color:#e0a800 !important">Buy-->
-                        <!--                            Now-->
-                        <!--                        </a>-->
+<!--                        <div class="product__details__quantity">-->
+<!--                        </div>-->
 
-                        <button type="submit" class="primary-btn " style="border: none !important;">ADD TO CARD<i
+                        <div id="outOfStockDiv" style="display: block;">
+                        <h5 class="text-danger">out of stock</h5>
+                        </div>
+
+                        <div id="availabilityDiv" style="display: none;">
+                             <button type="submit" class="primary-btn " style="border: none !important;">ADD TO CARD<i
                                 class="fas fa-shopping-cart"></i>
                         </button>
+                            <a href="{% url 'add_wishlist' variant_id=product.id %}" class="heart-icon"><span class="icon_heart_alt"></span> </a>
+                        </div>
 
-
-                        <!--                    <a href="" id="add_to_cart" class="primary-btn">ADD TO CARD</a>-->
-                        <a href="#" class="heart-icon"><span class="icon_heart_alt"></span> </a>
-                        {% endif %}
                         <div class="mt-4">
 
                             <div class="row">
@@ -174,10 +149,7 @@
                             <a class="nav-link active" data-toggle="tab" href="#tabs-1" role="tab"
                                aria-selected="true">Description</a>
                         </li>
-                        <!--                        <li class="nav-item">-->
-                        <!--                            <a class="nav-link" data-toggle="tab" href="#tabs-2" role="tab"-->
-                        <!--                               aria-selected="false">Information</a>-->
-                        <!--                        </li>-->
+
                         <li class="nav-item">
                             <a class="nav-link" data-toggle="tab" href="#tabs-3" role="tab"
                                aria-selected="false">Reviews <span>({{product.product.countReview}})</span></a>
@@ -190,27 +162,6 @@
                                 <p>{{product.product.description}}.</p>
                             </div>
                         </div>
-                        <!--                        <div class="tab-pane" id="tabs-2" role="tabpanel">-->
-                        <!--                            <div class="product__details__tab__desc">-->
-                        <!--                                <h6>Products Infomation</h6>-->
-                        <!--                                <p>Vestibulum ac diam sit amet quam vehicula elementum sed sit amet dui.-->
-                        <!--                                    Pellentesque in ipsum id orci porta dapibus. Proin eget tortor risus.-->
-                        <!--                                    Vivamus suscipit tortor eget felis porttitor volutpat. Vestibulum ac diam-->
-                        <!--                                    sit amet quam vehicula elementum sed sit amet dui. Donec rutrum congue leo-->
-                        <!--                                    eget malesuada. Vivamus suscipit tortor eget felis porttitor volutpat.-->
-                        <!--                                    Curabitur arcu erat, accumsan id imperdiet et, porttitor at sem. Praesent-->
-                        <!--                                    sapien massa, convallis a pellentesque nec, egestas non nisi. Vestibulum ac-->
-                        <!--                                    diam sit amet quam vehicula elementum sed sit amet dui. Vestibulum ante-->
-                        <!--                                    ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae;-->
-                        <!--                                    Donec velit neque, auctor sit amet aliquam vel, ullamcorper sit amet ligula.-->
-                        <!--                                    Proin eget tortor risus.</p>-->
-                        <!--                                <p>Praesent sapien massa, convallis a pellentesque nec, egestas non nisi. Lorem-->
-                        <!--                                    ipsum dolor sit amet, consectetur adipiscing elit. Mauris blandit aliquet-->
-                        <!--                                    elit, eget tincidunt nibh pulvinar a. Cras ultricies ligula sed magna dictum-->
-                        <!--                                    porta. Cras ultricies ligula sed magna dictum porta. Sed porttitor lectus-->
-                        <!--                                    nibh. Mauris blandit aliquet elit, eget tincidunt nibh pulvinar a.</p>-->
-                        <!--                            </div>-->
-                        <!--                        </div>-->
                         <div class="tab-pane" id="tabs-3" role="tabpanel">
                             <div class="product__details__tab__desc">
                                 <div class="row">
@@ -376,6 +327,9 @@
 
 {% block j-script %}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="{% static 'js/image_cropping/jquery.js'%}"></script>
+<script src="{% static 'js/image_cropping/script.js'%}"></script>
+<script src="{% static 'js/image_cropping/zoom.js'%}"></script>
 <script>
 $(document).ready(function() {
     $('#product-weight').on('change', function() {
@@ -428,7 +382,14 @@ $(document).ready(function () {
                  const discountPercentage = calculateDiscountPercentage(data.selling_price,data.original_price);
                  $("#offer_perc").text(discountPercentage+"%");
                  $("#variant_id").val(selectedValue);
-
+                  if (data.stock === "In Stock") {
+                        $("#availabilityDiv").show();
+                         $("#outOfStockDiv").hide();
+                     }else {
+                      $("#availabilityDiv").hide();
+                      $("#outOfStockDiv").show();
+                    }
+                  console.log(data.stock);
             },
             error: function (error) {
                 console.log(error);
@@ -504,15 +465,5 @@ function zoomOut(container) {
     var largeImage = container.querySelector('.product__details__pic__item--large');
     largeImage.style.transform = 'scale(1)';
 }
-
-
-
-
-
-
-
-
-
-
 </script>
 {% endblock %}

@@ -1,0 +1,200 @@
+{% extends 'layouts/main.html'%}
+{% load static %}
+{% block 'title'%} shope{% endblock %}
+{% block styles %}
+<style>
+
+.price {
+  font-weight: 600;
+  color: #212529;
+}
+
+.price-old {
+  color: #969696;
+  margin-left: 3px;
+  font-size: 85%;
+}
+/* Style the radio buttons as circles */
+.size-label {
+    position: relative;
+    padding-left: 30px;
+    cursor: pointer;
+    font-size: 16px;
+    display: block;
+    margin-bottom: 12px;
+    user-select: none;
+}
+
+/* Hide the default radio input */
+.size-label input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* Create a custom radio button */
+.checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 20px;
+    width: 20px;
+    background-color: #eee;
+    border-radius: 50%;
+    transition: background-color 0.3s; /* Smooth color transition */
+}
+
+/* On radio button selection, change the background color and hide the radio symbol */
+.size-label input:checked + .checkmark {
+    background-color: red;
+}
+
+/* Hide the dot/circle when radio button is selected */
+.size-label input:checked + .checkmark:after {
+    display: none;
+}
+
+/* Style the dot/circle inside the radio button */
+.size-label .checkmark:after {
+    content: "";
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: white;
+    transition: display 0.3s; /* Smooth transition for hiding the dot */
+}
+
+
+</style>
+{%endblock%}
+<!-- Body Section Begin -->
+{% block 'body'%}
+<!-- Breadcrumb Section Begin -->
+<section class="breadcrumb-section set-bg" data-setbg="{% static 'img/breadcrumb.jpg' %}">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 text-center">
+                <div class="breadcrumb__text">
+                    <h2 style="color:black;">Dryz Shop</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Breadcrumb Section End -->
+
+  <!-- Contact Section Begin -->
+    <section class="contact spad">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col-md-3 col-sm-6 text-center">
+                    <div class="contact__widget">
+                        <span class="icon_phone"></span>
+                        <h4>Phone</h4>
+                        <p>+01-3-8888-6868</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-6 text-center">
+                    <div class="contact__widget">
+                        <span class="icon_pin_alt"></span>
+                        <h4>Address</h4>
+                        <p>kakkanchery,Kozhikode</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-6 text-center">
+                    <div class="contact__widget">
+                        <span class="icon_clock_alt"></span>
+                        <h4>Open time</h4>
+                        <p>24 hrs</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-6 text-center">
+                    <div class="contact__widget">
+                        <span class="icon_mail_alt"></span>
+                        <h4>Email</h4>
+                        <p>dryzz.official@gmail.com</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Contact Section End -->
+
+    <!-- Map Begin -->
+    <div class="map">
+    <iframe
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d31209.09719788232!2d75.76626946477135!3d11.258753770664766!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba612ef96221b17%3A0x7c5a128c77d46c56!2sKozhikode%2C%20Kerala!5e0!3m2!1sen!2sin!4v1635799888820!5m2!1sen!2sin"
+        height="500" style="border:0;" allowfullscreen="" aria-hidden="false" tabindex="0"></iframe>
+    <div class="map-inside">
+        <i class="icon_pin"></i>
+        <div class="inside-widget">
+            <h4>Calicut</h4>
+            <ul>
+                <li>Phone: +12-345-6789</li>
+                <li>kakkanchery,Kozhikode</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+    <!-- Map End -->
+
+    <!-- Contact Form Begin -->
+    <div class="contact-form spad">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="contact__form__title">
+                        <h2>Leave Message</h2>
+                    </div>
+                </div>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-lg-6 col-md-6">
+                        <input type="text" placeholder="Your name" name="names" required>
+                    </div>
+                    <div class="col-lg-6 col-md-6">
+                        <input type="text" placeholder="Your Email" name="email" required>
+                    </div>
+                    <div class="col-lg-12 text-center">
+                        <textarea placeholder="Your message" name="message"></textarea>
+                        <button type="submit" class="site-btn">SEND MESSAGE</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- Contact Form End -->
+
+
+
+{% endblock%}
+
+{% block j-script %}
+<script>
+        $(function() {
+            const slider = $('.price-range');
+            const minAmount = $("#minamount");
+            const maxAmount = $("#maxamount");
+
+            slider.slider({
+                range: true,
+                min: 10,
+                max: 2000,
+                values: [10, 2000],
+                slide: function(event, ui) {
+                    minAmount.val("₹"+ui.values[0]);
+                    maxAmount.val("₹"+ui.values[1]);
+                }
+            });
+        });
+
+
+</script>
+{% endblock %}
+

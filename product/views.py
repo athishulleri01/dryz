@@ -85,9 +85,8 @@ def AddProduct(request):
                 variant.unit = unit
                 product.save()
                 variant.save()
-                for img in images:
-                    ProductImage.objects.create(product=product, image=img)
-
+        for img in images:
+            ProductImage.objects.create(product=product, image=img)
         return redirect('view_products')
         product.save()
 
@@ -173,12 +172,13 @@ def SingleProductView(request, product_id):
     cart_id = _cart_id(request)
     in_cart = CartItem.objects.filter(cart__cart_id=cart_id, product=product).exists()
     images = ProductImage.objects.filter(product=product)
+    imagesa = ProductImage.objects.filter(product=product).first()
     similar_product = ProductVariant.objects.filter(product__category=product.category)[:4]
 
-    try:
-        orderproduct = OrderItem.objects.filter(user=request.user,product = product).exists()
-    except OrderItem.DoesNotExist:
-        orderproduct = None
+    # try:
+    #     orderproduct = OrderItem.objects.filter(user=request.user,product = product).exists()
+    # except OrderItem.DoesNotExist:
+    #     orderproduct = None
 
     # get the review
     reviews = ReviewRating.objects.filter(product=product, status =True)
@@ -187,7 +187,7 @@ def SingleProductView(request, product_id):
         'variants': product_variant,
         'in_cart': in_cart,
         'images': images,
-        'orderproduct': orderproduct,
+        # 'orderproduct': orderproduct,
         'reviews': reviews,
         'similar_product': similar_product,
     }

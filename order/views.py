@@ -1,8 +1,10 @@
+from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
 from accounts.models import CustomUser
 from carts.models import CartItem
 from carts.views import render_to_pdf
+from home.models import UserWallet
 from order.models import Order, OrderItem, ReturnOrder, Coupon
 from django.http import HttpResponse
 from django.template.loader import get_template
@@ -10,13 +12,14 @@ from xhtml2pdf import pisa
 from django.contrib import messages
 # Create your views here.
 
-
+@login_required(login_url='user_signin')
 def ViewCoupons(request):
     coupons = Coupon.objects.all().order_by('-id')
     context = {
         'coupons': coupons
     }
     return render(request, 'adminside/coupon/view_coupon.html',context)
+
 
 
 def add_coupon(request):
@@ -163,10 +166,12 @@ def order_status(request):
             if order_status == 'Returned':
                 email = order.user.email
                 user = CustomUser.objects.get(email=email)
-                print("////////////////")
-                print(user.wallet)
                 user.wallet = user.wallet + order.total_price
-                print(user.wallet)
+                userwallet = UserWallet()
+                userwallet.user = user
+                userwallet.amount = order.total_price
+                userwallet.transaction = 'Credited'
+                userwallet.save()
                 user.save()
             order_item = OrderItem.objects.filter(order=order)
             context = {
@@ -256,6 +261,11 @@ def cancel_order(request,order_item_id):
             email = request.user
             user = CustomUser.objects.get(email=email)
             user.wallet = user.wallet + int(order.total_price)
+            userwallet = UserWallet()
+            userwallet.user = request.user
+            userwallet.amount = order.total_price
+            userwallet.transaction = 'Credited'
+            userwallet.save()
             user.save()
         for item in order_items:
             reason = request.POST.get('cancel')

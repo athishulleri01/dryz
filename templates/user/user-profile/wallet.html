@@ -11,6 +11,25 @@
             <div>
                 <h4>wallet balance : ₹{{wallet}}</h4>
             </div>
+           <table class="table text-start table-striped align-middle table-bordered table-hov  er mb-0">
+                <thead>
+                <tr class="text-dark">
+                    <th scope="col">Date</th>
+                    <th scope="col">Amount</th>
+                    <th scope="col">Transaction</th>
+
+                </tr>
+                </thead>
+                <tbody>
+                {% for item in wallet_transaction %}
+                <tr>
+                    <td>{{item.created_at}}</td>
+                    <td>{{item.amount}}</td>
+                    <td>{{item.transaction}}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+           </table>
         </div>
     </div>
 
