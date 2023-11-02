@@ -67,7 +67,13 @@
     transition: display 0.3s; /* Smooth transition for hiding the dot */
 }
 
-
+@media only screen and (max-width: 767px) {
+  #product_img {
+    width: 50%;
+    height: 90%;
+    margin-left:110px;
+  }
+}
 </style>
 {%endblock%}
 <!-- Body Section Begin -->
@@ -100,7 +106,7 @@
                         <ul>
                             <li><a href="{% url 'view_shop'%}">All Category</a>
                                 {% for cat in sub_category %}
-                            <li><a href="{% url 'show_category_product' cat_id=cat.id %}">{{cat.sub_category_name}}</a>
+                            <li><a href="{% url 'show_category_product' cat_id=cat.id %}">{{cat.category_name}}</a>
                             </li>
                             {% endfor %}
                         </ul>
@@ -313,7 +319,7 @@
                         <div class="product__item">
                             <div class="product__item__pic set-bg" data-setbg="">
                                 <a href="{% url 'single_product' product_id=product.id %}">
-                                    <img src="/media/{{product.product.images}}">
+                                    <img id="product_img" src="/media/{{product.product.images}}">
                                 </a>
                                 <ul class="product__item__pic__hover">
                                     <li><a href="{% url 'add_wishlist' variant_id=product.id%}"><i

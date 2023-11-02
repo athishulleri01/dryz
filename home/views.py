@@ -23,7 +23,6 @@ def home(request):
         if default_variant:
             product_queryset |= ProductVariant.objects.filter(pk=default_variant.pk)
 
-
     context = {
         'category': cat,
         'sub_category': sub_cat,
@@ -50,25 +49,33 @@ def remove_currency_symbols(input_string):
 
     return output_string
 
+
 from django.db.models import QuerySet
+
+
 def ViewShop(request):
     if request.method == 'POST':
         minamount = int(remove_currency_symbols(request.POST.get('minamount')))
         maxamount = int(remove_currency_symbols(request.POST.get('maxamount')))
         filter_weight = request.POST.get('filter_weight')
-
-        if minamount and minamount and filter_weight!= None:
-            print("hooo")
+      
+        if minamount and minamount and filter_weight is not None:
+            print("hooo", minamount, maxamount)
             products_within_price_range = ProductVariant.objects.filter(selling_price__gte=minamount,
-                                                                 selling_price__lte=maxamount,weight=filter_weight)
+                                                                        selling_price__lte=maxamount,
+                                                                        weight=filter_weight)
+
         else:
             products_within_price_range = ProductVariant.objects.filter(selling_price__gte=minamount,
                                                                         selling_price__lte=maxamount)
 
+        if filter_weight is None:
+            filter_weight = 0
+
         paginator = Paginator(products_within_price_range, 6)
         page_number = request.GET.get('page', 1)
         products_within_price_range = paginator.get_page(page_number)
-        sub_cat = Sub_Category.objects.filter(is_visible=True)
+        sub_cat = Category.objects.filter(is_visible=True)
         context = {
             'products': products_within_price_range,
             'all_products': products_within_price_range,
@@ -88,7 +95,7 @@ def ViewShop(request):
             default_variant = product.variants.filter(is_available=True).first()
             if default_variant:
                 product_queryset |= ProductVariant.objects.filter(pk=default_variant.pk)
-        sub_cat = Sub_Category.objects.filter(is_visible=True)
+        sub_cat = Category.objects.filter(is_visible=True)
         paginator = Paginator(product_queryset, 6)
         page_number = request.GET.get('page', 1)
         product_queryset = paginator.get_page(page_number)
@@ -108,7 +115,7 @@ def Search(request):
         keyword = request.GET['keyword']
         if keyword:
             products = Product.objects.order_by('-created_date').filter(
-                Q(description__icontains=keyword) | 
+                Q(description__icontains=keyword) |
                 Q(product_name__icontains=keyword))
     newest_products = Product.objects.all().order_by('-created_date')[:10]
     top_rated_products = Product.objects.all().order_by('created_date')[:10]

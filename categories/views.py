@@ -270,7 +270,7 @@ def Edit_Subcategory(request, subcat_id):
 
 def ShowCategoryProduct(request, cat_id):
     sub_cat = Sub_Category.objects.all()
-    products_with_default_variants = Product.objects.filter(sub_category=cat_id).prefetch_related('variants')
+    products_with_default_variants = Product.objects.filter(category=cat_id).prefetch_related('variants')
     product_queryset = ProductVariant.objects.none()
     for product in products_with_default_variants:
         default_variant = product.variants.filter(is_available=True).first()
