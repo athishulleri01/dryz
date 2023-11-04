@@ -152,7 +152,7 @@ EMAIL_HOST_USER = 'dryzz.official@gmail.com'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_PASSWORD = "cukznyklnwrvwnta"
+EMAIL_HOST_PASSWORD = "cukznyklnwrvwnta"s
 
 MESSAGE_TAGS = {
     messages.INFO: "",
@@ -160,5 +160,5 @@ MESSAGE_TAGS = {
 }
 
 
-key_id='rzp_test_PzX2VTfq3sLLr8'
-key_secret='0PauG8vEaKr5lT9G0Iw4DPgu'
+key_id = config('key_id')
+key_secret = config('key_secret')
