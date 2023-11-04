@@ -152,7 +152,7 @@ EMAIL_HOST_USER = 'dryzz.official@gmail.com'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_PASSWORD = "cukznyklnwrvwnta"s
+EMAIL_HOST_PASSWORD = "cukznyklnwrvwnta"
 
 MESSAGE_TAGS = {
     messages.INFO: "",
