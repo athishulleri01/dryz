@@ -13,7 +13,7 @@ import os
 from pathlib import Path
 import smtplib
 from django.contrib.messages import constants as messages
-from decouple import config
+# from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,10 +22,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY'),
+SECRET_KEY ='django-insecure-s6q(b$1w43wdxo6dz=&#-h814dh218&-#)zl1+l^9&b5t06oa^',
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', cast=bool),
+DEBUG = True,
 
 ALLOWED_HOSTS = []
 
@@ -91,8 +91,8 @@ DATABASES = {
     'default': {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "dryz",
-        "USER": config('DATABASE_USER'),
-        "PASSWORD": config('DATABASE_PASSWORD'),
+        "USER": "athish",
+        "PASSWORD":"athishulleri",
         "HOST": "localhost",
         "PORT": "5432",
     }
@@ -164,5 +164,5 @@ MESSAGE_TAGS = {
 }
 
 
-key_id = config('key_id')
-key_secret = config('key_secret')
+# key_id = config('key_id')
+# key_secret = config('key_secret')
