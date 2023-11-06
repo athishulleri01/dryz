@@ -4,7 +4,7 @@ from django.db.models.signals import Signal
 from dryz import settings  # Importing settings.py from a package
 
 # Access variables or configurations defined in settings.py
-# Example usage: accessing a variable from settings.py
+# piExample usage: accessing a variable from settings.py
 
 from django.dispatch import receiver
 from django.core.mail import send_mail
