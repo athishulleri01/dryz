@@ -142,7 +142,7 @@ def view_single_order_admin(request, order_id):
 
 
 def order_status(request):
-    print("[[[[[")
+
     if request.method == 'POST':
         try:
             order_id = request.POST.get('order_id')
