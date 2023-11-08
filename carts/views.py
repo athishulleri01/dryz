@@ -155,12 +155,16 @@ def add_cart(request, product_id):
 
 
 def cart(request, total=0, quantity=0, cart_items=None):
+    url = request.META.get('HTTP_REFERER')
     cart_id = _cart_id(request)
     tax = 0
     grand_total = 0
     current_date = timezone.now()
     if request.method == 'POST':
-
+        coupon_select = request.POST.get('coupon_select')
+        if coupon_select is None:
+            messages.error(request, f'Enter proper coupon code !')
+            return redirect(url)
         try:
             try:
                 email = request.session['user-email']
@@ -172,6 +176,7 @@ def cart(request, total=0, quantity=0, cart_items=None):
                 cart_items = CartItem.objects.filter(cart=cart, is_active=True).order_by('id')
 
             coupon_select = request.POST.get('coupon_select')
+
             valid_coupons = Coupon.objects.get(
                 Q(coupon_code=coupon_select) &
                 Q(start_date__lte=current_date) &
@@ -698,7 +703,7 @@ def checkout(request):
         return render(request, 'user/checkout/checkout.html', context)
     return redirect('user_signin')
 
-
+from typing import Dict,Any
 def pdf_download(request,id):
     order=Order.objects.get(id=id)
     neworderitems=OrderItem.objects.filter(order=order)
@@ -810,8 +815,10 @@ def fetch_resources(uri, rel):
     return path
 
 
-@login_required(login_url='user_signin')
-def render_to_pdf(template_src, context_dict={}):
+# @login_required(login_url='user_signin')
+def render_to_pdf(template_src, context_dict=None):
+    if context_dict is None:
+        context_dict = {}
     template = get_template(template_src)
     html  = template.render(context_dict)
     result = BytesIO()
