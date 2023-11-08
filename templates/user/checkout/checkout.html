@@ -245,7 +245,7 @@
                 <h5 class="modal-title" id="exampleModalLabel1">Add Address</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form method="post" action="{% url 'add_address_checkout' %}">
+            <form method="post" action="{% url 'add_address_checkout' %}" id="form">
                 {% csrf_token %}
                 <div class="row">
                     <div class="col-md-6">
@@ -258,7 +258,7 @@
                     <div class="col-md-6">
                         <div class="mb-3 ml-1 mr-2">
                             <label for="house_no" class="form-label">House No:</label>
-                            <input type="text" class="form-control" name="house_no" value=""
+                            <input type="text" class="form-control" name="house_no" value="" id="house_no1"
                                    placeholder="Enter House No" required>
                         </div>
                     </div>
@@ -292,7 +292,7 @@
                     <div class="col-md-6">
                         <div class="mb-3 ml-1 mr-2">
                             <label for="district" class="form-label">District:</label>
-                            <input type="text" class="form-control" id="districct" name="district" value=""
+                            <input type="text" class="form-control" id="district1" name="district" value=""
                                    placeholder="Enter District" required>
                         </div>
                     </div>
@@ -301,14 +301,14 @@
                     <div class="col-md-6">
                         <div class="mb-3 ml-2 mr-1">
                             <label for="postal_code" class="form-label"> Email:</label>
-                            <input type="text" class="form-control" name="email" placeholder="Enter Email" value=""
+                            <input type="text" class="form-control" name="email" placeholder="Enter Email" value="" id="email1"
                                    required>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="mb-3 ml-1 mr-2">
                             <label for="district" class="form-label">phone:</label>
-                            <input type="tel" class="form-control" name="phone" placeholder="phone" required>
+                            <input type="tel" class="form-control" name="phone" placeholder="phone" required id="phone1">
                         </div>
                     </div>
                 </div>
@@ -317,14 +317,14 @@
                     <div class="col-md-6">
                         <div class="mb-3 ml-2 mr-1">
                             <label for="state" class="form-label">State:</label>
-                            <input type="text" class="form-control" name="state" value="" placeholder="Enter State"
-                                   required>
+                            <input type="text" class="form-control" name="state" id="state1" value="" placeholder="Enter State"
+                                   id="state1" required >
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="mb-3 ml-1 mr-2">
                             <label for="country" class="form-label">Country:</label>
-                            <input type="text" class="form-control" name="country" value="" placeholder="Enter country"
+                            <input type="text" class="form-control" id="country1" name="country" value="" placeholder="Enter country"
                                    required>
                         </div>
                     </div>
@@ -436,6 +436,142 @@
 
 
     });
+
+
+
+     // Form 1 validation
+    document.getElementById('form').addEventListener('submit', function(e) {
+        e.preventDefault();
+const recipientName = document.getElementById('RecipientName').value;
+        const houseNo = document.getElementById('house_no1').value;
+        const street_name = document.getElementById('street_name').value;
+        const village = document.getElementById('Village').value;
+        const postal_code = document.getElementById('postal_code').value;
+        const district = document.getElementById('district1').value;
+        const email = document.getElementById('email1').value;
+        const country = document.getElementById('country1').value;
+        const phone = document.getElementById('phone1').value;
+        const state = document.getElementById('state1').value;
+
+
+        // Regular expressions for validation
+        const nameRegex = /^[A-Za-z]+$/;  // Matches letters only
+        const houseNoRegex = /^\d+$/;     // Matches digits only
+        const streetNameRegex = /^[a-zA-Z0-9\s]+$/;
+        const villageRegex = /^[a-zA-Z0-9\s]+$/;
+        const postalCodeRegex = /^\d+$/;
+        const DistrictRegex = /^[a-zA-Z0-9\s]+$/;
+        const CountryRegex = /^[a-zA-Z0-9\s]+$/;
+        const StateRegex = /^[a-zA-Z0-9\s]+$/;
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+
+        // Perform validation
+        if (!nameRegex.test(recipientName)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid Recipient Name',
+                text: 'Please enter a valid recipient name with letters only!'
+            });
+            return; // Stops the form submission
+        }
+
+        if (!houseNoRegex.test(houseNo)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Enter numbers',
+                text: 'Please enter a valid house number with numbers only!'
+            });
+            return; // Stops the form submission
+        }
+
+        if (!streetNameRegex.test(street_name)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Enter properly',
+                text: 'Please enter a valid street name!'
+            });
+            return; // Stops the form submission
+        }
+
+        if (!villageRegex.test(village)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Enter properly',
+                text: 'Please enter a valid village name!'
+            });
+            return; // Stops the form submission
+        }
+
+
+        if (!postalCodeRegex.test(postal_code)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Enter numbers',
+                text: 'Please enter a valid postal pin with numbers only!'
+            });
+            return; // Stops the form submission
+        }
+
+         if (!DistrictRegex.test(district)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Enter properly',
+                text: 'Please enter a valid district !'
+            });
+            return; // Stops the form submission
+        }
+
+        if (!StateRegex.test(state)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Enter properly',
+                text: 'Please enter a valid state!'
+            });
+            return; // Stops the form submission
+        }
+
+        if (!CountryRegex.test(country)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Enter properly',
+                text: 'Please enter a valid country!'
+            });
+            return; // Stops the form submission
+        }
+
+         if (!emailRegex.test(email)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Enter proper email',
+                text: 'Please enter a valid email address!'
+            });
+            return; // Stops the form submission
+        }
+
+
+
+
+        // If validation passes, you can submit the form here
+<!--        form.submit();-->
+const isFormValid = (
+        nameRegex.test(recipientName) &&
+        houseNoRegex.test(houseNo) &&
+        streetNameRegex.test(street_name) &&
+        villageRegex.test(village) &&
+        postalCodeRegex.test(postal_code) &&
+        DistrictRegex.test(district) &&
+        StateRegex.test(state) &&
+        CountryRegex.test(country) &&
+        emailRegex.test(email)
+    );
+
+    if (isFormValid) {
+        // Get the form and submit it
+        document.getElementById('form').submit();
+    }
+    });
+
 
 </script>
 <script src="{% static 'js/checkout.js' %}"></script>
