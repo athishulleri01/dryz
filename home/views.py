@@ -114,12 +114,12 @@ def Search(request):
     if 'keyword' in request.GET:
         keyword = request.GET['keyword']
         if keyword:
-            products = Product.objects.order_by('-created_date').filter(
-                Q(description__icontains=keyword) |
-                Q(product_name__icontains=keyword))
-    newest_products = Product.objects.all().order_by('-created_date')[:10]
-    top_rated_products = Product.objects.all().order_by('created_date')[:10]
-    sub_cat = Sub_Category.objects.all()
+            products = ProductVariant.objects.order_by('-created_date').filter(
+                Q(product__description__icontains=keyword) |
+                Q(product__product_name__icontains=keyword))
+    newest_products = ProductVariant.objects.all().order_by('-created_date')[:10]
+    top_rated_products = ProductVariant.objects.all().order_by('created_date')[:10]
+    sub_cat = Category.objects.all()
 
     context = {
         'products': products,
