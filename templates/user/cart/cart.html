@@ -225,7 +225,10 @@
                 var discountSpan = document.getElementById('discount')
                 var discount = discountSpan.textContent;
                 console.log(discount);
-
+                if (isNaN(discount))
+                {
+                discount=0;
+                }
 
                     // Update the content of the span with the received total value
                     var total = data.sub_total - parseInt(discount);
@@ -266,6 +269,10 @@
                 var discountSpan = document.getElementById('discount')
                 var discount = discountSpan.textContent;
                 console.log(discount);
+                if (isNaN(discount))
+                {
+                discount=0;
+                }
 
                     // Update the content of the span with the received total value
                     var total = data.sub_total - parseInt(discount);
