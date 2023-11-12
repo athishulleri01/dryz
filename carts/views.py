@@ -771,6 +771,7 @@ def order(request, id=None):
     except:
         offer = None
     total = 0
+    sub_total = 0
     if id:
         order = Order.objects.get(payment_id=id)
         print(order.payment_mode)
@@ -783,11 +784,13 @@ def order(request, id=None):
             del request.session['coupon']
         else:
             offer = 0
+        sub_total = offer + total
         context = {
             'order': order,
             'cart_items': neworderitems,
             'total': total,
-            'offer': offer
+            'offer': offer,
+            'sub_total': sub_total
         }
         return render(request, 'user/order/order_page.html', context)
     email=request.user
@@ -804,11 +807,13 @@ def order(request, id=None):
         del request.session['coupon']
     else:
         offer = 0
+    sub_total = offer + total
     context = {
         'order': order,
         'cart_items': neworderitems,
         'total': total,
-        'offer': offer
+        'offer': offer,
+        'sub_total': sub_total
     }
     return  render(request, 'user/order/order_page.html', context)
 
