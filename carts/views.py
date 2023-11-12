@@ -781,10 +781,13 @@ def order(request, id=None):
         if offer is not None:
             total = total - offer
             del request.session['coupon']
+        else:
+            offer = 0
         context = {
             'order': order,
             'cart_items': neworderitems,
-            'total': total
+            'total': total,
+            'offer': offer
         }
         return render(request, 'user/order/order_page.html', context)
     email=request.user
@@ -799,10 +802,13 @@ def order(request, id=None):
         offer = request.session['coupon']
         total = total - offer
         del request.session['coupon']
+    else:
+        offer = 0
     context = {
         'order': order,
         'cart_items': neworderitems,
-        'total': total
+        'total': total,
+        'offer': offer
     }
     return  render(request, 'user/order/order_page.html', context)
 
