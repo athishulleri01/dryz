@@ -301,6 +301,7 @@ def remove(request, product_id):
 def adding(request, product_id):
     cart_id = _cart_id(request)  # Get or generate the cart_id
     productvariant = get_object_or_404(ProductVariant, id=product_id)
+
     try:
         email = request.session['user-email']
         user = CustomUser.objects.get(email=email)
@@ -309,20 +310,35 @@ def adding(request, product_id):
         cart = Cart.objects.get(cart_id=cart_id)
         cart_item = CartItem.objects.get(variant=productvariant, cart=cart)
 
+    if productvariant.stock <= cart_item.quantity:
+
+        sub_total = 0
+        try:
+            cart_items = CartItem.objects.filter(user=request.user, is_active=True)
+        except:
+            cart = Cart.objects.get(cart_id=cart_id)
+            cart_items = CartItem.objects.filter(cart=cart, is_active=True)
+        for item in cart_items:
+            sub_total += (item.variant.selling_price * item.quantity)
+        total = cart_item.quantity * cart_item.variant.selling_price
+        return JsonResponse(
+            {'quantity': cart_item.quantity, 'total': total, 'sub_total': sub_total, 'messages': "error"})
     # if cart_item.quantity > 1:
-    cart_item.quantity += 1
-    cart_item.save()
-    # calculating subtotal
-    sub_total = 0
-    try:
-        cart_items = CartItem.objects.filter(user=request.user, is_active=True)
-    except:
-        cart = Cart.objects.get(cart_id=cart_id)
-        cart_items = CartItem.objects.filter(cart=cart, is_active=True)
-    for item in cart_items:
-        sub_total += (item.variant.selling_price * item.quantity)
-    total = cart_item.quantity * cart_item.variant.selling_price
-    return JsonResponse({'quantity': cart_item.quantity, 'total': total, 'sub_total': sub_total})
+    else:
+        cart_item.quantity += 1
+        cart_item.save()
+        # calculating subtotal
+        sub_total = 0
+        try:
+            cart_items = CartItem.objects.filter(user=request.user, is_active=True)
+        except:
+            cart = Cart.objects.get(cart_id=cart_id)
+            cart_items = CartItem.objects.filter(cart=cart, is_active=True)
+        for item in cart_items:
+            sub_total += (item.variant.selling_price * item.quantity)
+        total = cart_item.quantity * cart_item.variant.selling_price
+        return JsonResponse(
+            {'quantity': cart_item.quantity, 'total': total, 'sub_total': sub_total, "messages": "success"})
 
 
 def remove_cart_item(request, product_id):

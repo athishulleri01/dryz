@@ -128,9 +128,11 @@
                             <div>
                                 <select class="form-select" aria-label="Default select example" id="coupon_select"
                                         name="coupon_select">
+                                    {% if user.is_authenticated %}
                                     {% for coupon in valid_coupons %}
                                     <option value="{{ coupon.coupon_code }}">{{ coupon.coupon_name }}</option>
                                     {% endfor %}
+                                    {% endif %}
                                 </select>
                             </div>
                         </form>
@@ -213,6 +215,15 @@
                 csrfmiddlewaretoken: csrftoken
             },
             success: function (data) {
+            if (data.messages=="error"){
+                    Swal.fire({
+                      position: "top-end",
+                      icon: "error",
+                      title: "Out of stock",
+                      showConfirmButton: false,
+                      timer: 1500
+                    });
+                }
                 quantityField.val(data.quantity);
                 console.log(data.quantity);
                 console.log(data.sub_total);
