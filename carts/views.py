@@ -738,25 +738,38 @@ def pdf_download(request,id):
         response['Content-Disposition'] = content
         return response
 
+
 @login_required(login_url='user_signin')
 def add_address_checkout(request):
     email = request.session['user-email']
     user = CustomUser.objects.get(email=email)
-    address = Address()
-    address.user_id = user
-    address.recipient_name = request.POST.get('RecipientName')
-    address.email = request.POST.get('email')
-    address.house_no = request.POST.get('house_no')
-    address.street_name = request.POST.get('street_name')
-    address.village_name = request.POST.get('Village')
-    address.postal_code = request.POST.get('postal_code')
-    address.district = request.POST.get('district')
-    address.state = request.POST.get('state')
-    address.phone = request.POST.get('phone')
-    address.country = request.POST.get('country')
-    address.save()
-    # addresses = Address.objects.filter(user_id=user)
-    return redirect('checkout')
+    try:
+        name = request.POST.get('RecipientName')
+        print(name)
+        if Address.objects.filter(user_id=user, recipient_name=name).exists():
+            print("error")
+            messages.error("This user address already exist..!")
+            return redirect('checkout')
+        else:
+            print("yes")
+            address = Address()
+            address.user_id = user
+            address.recipient_name = request.POST.get('RecipientName')
+            address.email = request.POST.get('email')
+            address.house_no = request.POST.get('house_no')
+            address.street_name = request.POST.get('street_name')
+            address.village_name = request.POST.get('Village')
+            address.postal_code = request.POST.get('postal_code')
+            address.district = request.POST.get('district')
+            address.state = request.POST.get('state')
+            address.phone = request.POST.get('phone')
+            address.country = request.POST.get('country')
+            address.save()
+            # addresses = Address.objects.filter(user_id=user)
+            return redirect('checkout')
+    except:
+        messages.error(request, "This user address already exist..!")
+        return redirect('checkout')
 
 
 @login_required(login_url='user_signin')
