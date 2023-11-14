@@ -3,6 +3,8 @@ from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.views.decorators.cache import never_cache, cache_control
+
 from accounts.models import CustomUser
 from order.models import Order, OrderItem
 from django.db.models import Sum
@@ -35,13 +37,15 @@ def AdminLogin(request):
     return render(request, 'adminside/admin_login.html')
 
 
+@never_cache
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def AdminLogout(request):
     if 'admin_email' in request.session:
         logout(request)
 
     return redirect('dashboard')
 
-
+@never_cache
 def DashBoard(request):
     if 'admin_email' in request.session:
         email = request.session['admin_email']
